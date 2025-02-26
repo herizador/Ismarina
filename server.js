@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { OpenAI } from "openai";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
 
 dotenv.config(); // Cargar variables de entorno
 
@@ -76,7 +77,9 @@ app.post('/register', async (req, res) => {
 
         if (await User.findOne({ username })) return res.status(400).json({ error: "❌ El usuario ya existe" });
 
-        await new User({ username, password }).save();
+        const hashedPassword = await bcrypt.hash(password, 10); // 🔒 Cifrar contraseña
+        await new User({ username, password: hashedPassword }).save();
+
         res.json({ message: "✅ Usuario registrado con éxito" });
     } catch (error) {
         res.status(500).json({ error: "❌ Error en el servidor" });
@@ -88,8 +91,10 @@ app.post('/login', async (req, res) => {
         const { username, password } = req.body;
         if (!username || !password) return res.status(400).json({ error: "❌ Usuario y contraseña son obligatorios" });
 
-        const user = await User.findOne({ username, password });
-        if (!user) return res.status(400).json({ error: "❌ Credenciales incorrectas" });
+        const user = await User.findOne({ username });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(400).json({ error: "❌ Credenciales incorrectas" });
+        }
 
         res.json({ message: "✅ Inicio de sesión exitoso" });
     } catch (error) {
