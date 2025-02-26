@@ -9,6 +9,7 @@
     "mongoose": "^7.2.1",
     "dotenv": "^16.0.3",
     "cors": "^2.8.5"
+    "openai": "^4.0.0"
   },
   "scripts": {
     "start": "node server.js"
