@@ -18,6 +18,16 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ Conectado a MongoDB'))
 .catch(err => console.error('❌ Error al conectar:', err));
 
+const mongoose = require('mongoose');
+
+const diarySchema = new mongoose.Schema({
+    user: String,
+    entry: String,
+    date: { type: Date, default: Date.now }
+});
+
+const DiaryEntry = mongoose.model('DiaryEntry', diarySchema);
+
 // Modelo de usuario
 const UserSchema = new mongoose.Schema({
     username: String,
