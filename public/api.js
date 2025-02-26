@@ -52,4 +52,49 @@ async function addHeart(user) {
     return response.json();
 }
 
-export { registerUser, loginUser, getDiaryEntries, addDiaryEntry, getHearts, addHeart };
+// Obtener recuerdos privados
+async function getPrivateMemories(user) {
+    const response = await fetch(`${API_BASE_URL}/recuerdos?user=${user}`);
+    return response.json();
+}
+
+// Agregar un recuerdo privado
+async function addPrivateMemory(user, memory) {
+    const response = await fetch(`${API_BASE_URL}/recuerdos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user, memory })
+    });
+    return response.json();
+}
+
+// Asistente Virtual con IA
+async function askAI(message) {
+    const response = await fetch(`${API_BASE_URL}/asistente`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+    });
+    return response.json();
+}
+
+// Obtener notificaciones
+async function getNotifications() {
+    const response = await fetch(`${API_BASE_URL}/notificaciones`);
+    return response.json();
+}
+
+// Agregar una nueva notificación
+async function addNotification(message) {
+    const response = await fetch(`${API_BASE_URL}/notificaciones`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+    });
+    return response.json();
+}
+
+export { 
+    registerUser, loginUser, getDiaryEntries, addDiaryEntry, getHearts, addHeart, 
+    getPrivateMemories, addPrivateMemory, askAI, getNotifications, addNotification 
+};
