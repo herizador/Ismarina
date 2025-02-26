@@ -14,6 +14,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Definida e
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); // 📂 Carpeta con HTML, CSS, JS
 
 // 📌 Conectar a MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -52,9 +53,6 @@ const NotificationSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 const Notification = mongoose.model("Notification", NotificationSchema);
-
-// 📌 Ruta de prueba
-app.get('/', (req, res) => res.send('🚀 Servidor funcionando correctamente'));
 
 // 📌 Asistente Virtual con IA
 app.post('/asistente', async (req, res) => {
@@ -192,5 +190,6 @@ app.post('/notificaciones', async (req, res) => {
 });
 
 // 📌 Iniciar servidor
-app.listen(PORT, () => console.log(`🔥 Servidor corriendo en el puerto ${PORT}`));
-
+app.listen(3000, () => {
+    console.log('🚀 Servidor en http://localhost:3000');
+});
