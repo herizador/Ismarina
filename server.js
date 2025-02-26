@@ -1,14 +1,16 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import fetch from "node-fetch";
+import { OpenAI } from "openai";
 import dotenv from "dotenv";
 
 dotenv.config(); // Cargar variables de entorno
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // Definida en Render
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+}); // Definida en Render
 
 // Middleware
 app.use(cors());
@@ -49,20 +51,18 @@ app.get('/', (req, res) => res.send('🚀 Servidor funcionando correctamente'));
 
 // 📌 Asistente Virtual con IA
 app.post('/asistente', async (req, res) => {
-    const { message } = req.body;
     try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENAI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: "user", content: message }] })
+        const { message } = req.body;
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: message }]
         });
-        const data = await response.json();
-        res.json({ response: data.choices[0].message.content });
+
+        res.json({ response: completion.choices[0].message.content });
+
     } catch (error) {
-        console.error("Error en la IA:", error);
+        console.error("Error en OpenAI:", error);
         res.status(500).json({ error: "❌ Error con OpenAI" });
     }
 });
