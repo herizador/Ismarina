@@ -26,7 +26,8 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // 📌 Modelos de MongoDB
 const UserSchema = new mongoose.Schema({ username: String, password: String });
-const User = mongoose.model("User", UserSchema);
+const user = await User.findOne({ username, password });
+if (!user) return res.status(400).json({ error: "❌ Credenciales incorrectas" });
 
 const DiarySchema = new mongoose.Schema({
     user: String, entry: String, date: { type: Date, default: Date.now }
@@ -120,8 +121,16 @@ app.post('/diary', async (req, res) => {
 
 // 📌 Recuerdos Privados
 app.get('/recuerdos', async (req, res) => {
-    const { user } = req.query;
-    res.json(await PrivateMemory.find({ user }));
+    try {
+        const { user } = req.query;
+        if (!user) return res.status(400).json({ error: "❌ Usuario es obligatorio" });
+
+        const recuerdos = await PrivateMemory.find({ user });
+        res.json(recuerdos);
+    } catch (error) {
+        console.error("Error al obtener recuerdos:", error);
+        res.status(500).json({ error: "❌ Error en el servidor" });
+    }
 });
 
 app.post('/recuerdos', async (req, res) => {
