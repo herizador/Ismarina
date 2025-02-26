@@ -50,6 +50,13 @@ const PrivateMemorySchema = new mongoose.Schema({
 });
 const PrivateMemory = mongoose.model("PrivateMemory", PrivateMemorySchema);
 
+// Modelo de notificaciones
+const NotificationSchema = new mongoose.Schema({
+    message: String,
+    date: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model("Notification", NotificationSchema);
+
 // 📌 Ruta de prueba
 app.get('/', (req, res) => {
     res.send('🚀 Servidor funcionando correctamente');
@@ -173,6 +180,19 @@ app.post('/hearts', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "❌ Error al actualizar los corazones" });
     }
+});
+
+// 📌 Rutas de notificaciones personalizadas
+app.get('/notificaciones', async (req, res) => {
+    const notifications = await Notification.find();
+    res.json(notifications);
+});
+
+app.post('/notificaciones', async (req, res) => {
+    const { message } = req.body;
+    const newNotification = new Notification({ message });
+    await newNotification.save();
+    res.json({ message: "🔔 Notificación guardada", newNotification });
 });
 
 // 📌 Iniciar servidor
