@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api.render.com/deploy/srv-cuvmd8lsvqrc73c31cu0?key=Gu0XrG4a22E"; // Reemplaza con tu URL en Render
+const API_BASE_URL = "https://ismarina.onrender.com"; // Reemplaza con tu URL en Render
 
 // Registrar un usuario
 async function registerUser(username, password) {
