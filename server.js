@@ -42,6 +42,14 @@ const HeartSchema = new mongoose.Schema({
 });
 const Heart = mongoose.model("Heart", HeartSchema);
 
+// Modelo de recuerdos privados
+const PrivateMemorySchema = new mongoose.Schema({
+    user: String,
+    memory: String,
+    date: { type: Date, default: Date.now }
+});
+const PrivateMemory = mongoose.model("PrivateMemory", PrivateMemorySchema);
+
 // 📌 Ruta de prueba
 app.get('/', (req, res) => {
     res.send('🚀 Servidor funcionando correctamente');
@@ -112,6 +120,20 @@ app.post('/diary', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "❌ Error al guardar la entrada" });
     }
+});
+
+// 📌 Rutas de recuerdos privados
+app.get('/recuerdos', async (req, res) => {
+    const { user } = req.query;
+    const memories = await PrivateMemory.find({ user });
+    res.json(memories);
+});
+
+app.post('/recuerdos', async (req, res) => {
+    const { user, memory } = req.body;
+    const newMemory = new PrivateMemory({ user, memory });
+    await newMemory.save();
+    res.json({ message: "💖 Recuerdo privado guardado", newMemory });
 });
 
 // 📌 Rutas del contador de corazones
