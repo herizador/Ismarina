@@ -1,12 +1,14 @@
-import fetch from "node-fetch"; // Asegúrate de usar `import` si tienes ESModules, si no usa `const fetch = require("node-fetch");`
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // Definida en Render
-require('dotenv').config();
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+
+dotenv.config(); // Cargar variables de entorno
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // Definida en Render
 
 // Middleware
 app.use(cors());
@@ -21,52 +23,33 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.error('❌ Error al conectar:', err));
 
 // 📌 Modelos de MongoDB
-
-// Modelo de usuario
-const UserSchema = new mongoose.Schema({
-    username: String,
-    password: String
-});
+const UserSchema = new mongoose.Schema({ username: String, password: String });
 const User = mongoose.model("User", UserSchema);
 
-// Modelo de diario
 const DiarySchema = new mongoose.Schema({
-    user: String,
-    entry: String,
-    date: { type: Date, default: Date.now }
+    user: String, entry: String, date: { type: Date, default: Date.now }
 });
 const Diary = mongoose.model("Diary", DiarySchema);
 
-// Modelo de corazones
-const HeartSchema = new mongoose.Schema({
-    user: String,
-    count: { type: Number, default: 0 }
-});
+const HeartSchema = new mongoose.Schema({ user: String, count: { type: Number, default: 0 } });
 const Heart = mongoose.model("Heart", HeartSchema);
 
-// Modelo de recuerdos privados
 const PrivateMemorySchema = new mongoose.Schema({
-    user: String,
-    memory: String,
-    date: { type: Date, default: Date.now }
+    user: String, memory: String, date: { type: Date, default: Date.now }
 });
 const PrivateMemory = mongoose.model("PrivateMemory", PrivateMemorySchema);
 
-// Modelo de notificaciones
 const NotificationSchema = new mongoose.Schema({
-    message: String,
-    date: { type: Date, default: Date.now }
+    message: String, date: { type: Date, default: Date.now }
 });
 const Notification = mongoose.model("Notification", NotificationSchema);
 
 // 📌 Ruta de prueba
-app.get('/', (req, res) => {
-    res.send('🚀 Servidor funcionando correctamente');
-});
+app.get('/', (req, res) => res.send('🚀 Servidor funcionando correctamente'));
 
+// 📌 Asistente Virtual con IA
 app.post('/asistente', async (req, res) => {
     const { message } = req.body;
-
     try {
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
@@ -74,12 +57,8 @@ app.post('/asistente', async (req, res) => {
                 "Authorization": `Bearer ${OPENAI_API_KEY}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [{ role: "user", content: message }]
-            })
+            body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: "user", content: message }] })
         });
-
         const data = await response.json();
         res.json({ response: data.choices[0].message.content });
     } catch (error) {
@@ -88,23 +67,16 @@ app.post('/asistente', async (req, res) => {
     }
 });
 
-// 📌 Rutas de autenticación
+// 📌 Autenticación
 app.post('/register', async (req, res) => {
     try {
         const { username, password } = req.body;
-        if (!username || !password) {
-            return res.status(400).json({ error: "❌ Usuario y contraseña son obligatorios" });
-        }
+        if (!username || !password) return res.status(400).json({ error: "❌ Usuario y contraseña son obligatorios" });
 
-        const userExists = await User.findOne({ username });
-        if (userExists) {
-            return res.status(400).json({ error: "❌ El usuario ya existe" });
-        }
+        if (await User.findOne({ username })) return res.status(400).json({ error: "❌ El usuario ya existe" });
 
-        const newUser = new User({ username, password });
-        await newUser.save();
+        await new User({ username, password }).save();
         res.json({ message: "✅ Usuario registrado con éxito" });
-
     } catch (error) {
         res.status(500).json({ error: "❌ Error en el servidor" });
     }
@@ -113,27 +85,21 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        if (!username || !password) {
-            return res.status(400).json({ error: "❌ Usuario y contraseña son obligatorios" });
-        }
+        if (!username || !password) return res.status(400).json({ error: "❌ Usuario y contraseña son obligatorios" });
 
         const user = await User.findOne({ username, password });
-        if (!user) {
-            return res.status(400).json({ error: "❌ Credenciales incorrectas" });
-        }
+        if (!user) return res.status(400).json({ error: "❌ Credenciales incorrectas" });
 
         res.json({ message: "✅ Inicio de sesión exitoso" });
-
     } catch (error) {
         res.status(500).json({ error: "❌ Error en el servidor" });
     }
 });
 
-// 📌 Rutas del diario de amor
+// 📌 Diario de Amor
 app.get('/diary', async (req, res) => {
     try {
-        const entries = await Diary.find();
-        res.json(entries);
+        res.json(await Diary.find());
     } catch (error) {
         res.status(500).json({ error: "❌ Error al obtener las entradas" });
     }
@@ -142,24 +108,20 @@ app.get('/diary', async (req, res) => {
 app.post('/diary', async (req, res) => {
     try {
         const { user, entry } = req.body;
-        if (!user || !entry) {
-            return res.status(400).json({ error: "❌ Usuario y entrada son obligatorios" });
-        }
+        if (!user || !entry) return res.status(400).json({ error: "❌ Usuario y entrada son obligatorios" });
 
         const newEntry = new Diary({ user, entry });
         await newEntry.save();
         res.json({ message: "✅ Entrada agregada al diario", newEntry });
-
     } catch (error) {
         res.status(500).json({ error: "❌ Error al guardar la entrada" });
     }
 });
 
-// 📌 Rutas de recuerdos privados
+// 📌 Recuerdos Privados
 app.get('/recuerdos', async (req, res) => {
     const { user } = req.query;
-    const memories = await PrivateMemory.find({ user });
-    res.json(memories);
+    res.json(await PrivateMemory.find({ user }));
 });
 
 app.post('/recuerdos', async (req, res) => {
@@ -169,17 +131,14 @@ app.post('/recuerdos', async (req, res) => {
     res.json({ message: "💖 Recuerdo privado guardado", newMemory });
 });
 
-// 📌 Rutas del contador de corazones
+// 📌 Contador de Corazones
 app.get('/hearts', async (req, res) => {
     try {
         const { user } = req.query;
-        if (!user) {
-            return res.status(400).json({ error: "❌ Usuario es obligatorio" });
-        }
+        if (!user) return res.status(400).json({ error: "❌ Usuario es obligatorio" });
 
         const heartData = await Heart.findOne({ user }) || { user, count: 0 };
         res.json(heartData);
-
     } catch (error) {
         res.status(500).json({ error: "❌ Error al obtener los corazones" });
     }
@@ -188,30 +147,22 @@ app.get('/hearts', async (req, res) => {
 app.post('/hearts', async (req, res) => {
     try {
         const { user } = req.body;
-        if (!user) {
-            return res.status(400).json({ error: "❌ Usuario es obligatorio" });
-        }
+        if (!user) return res.status(400).json({ error: "❌ Usuario es obligatorio" });
 
         let heartData = await Heart.findOne({ user });
-
-        if (!heartData) {
-            heartData = new Heart({ user, count: 1 });
-        } else {
-            heartData.count += 1;
-        }
+        if (!heartData) heartData = new Heart({ user, count: 1 });
+        else heartData.count += 1;
 
         await heartData.save();
         res.json({ message: "💖 Corazón agregado!", count: heartData.count });
-
     } catch (error) {
         res.status(500).json({ error: "❌ Error al actualizar los corazones" });
     }
 });
 
-// 📌 Rutas de notificaciones personalizadas
+// 📌 Notificaciones
 app.get('/notificaciones', async (req, res) => {
-    const notifications = await Notification.find();
-    res.json(notifications);
+    res.json(await Notification.find());
 });
 
 app.post('/notificaciones', async (req, res) => {
@@ -222,6 +173,4 @@ app.post('/notificaciones', async (req, res) => {
 });
 
 // 📌 Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`🔥 Servidor corriendo en el puerto ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🔥 Servidor corriendo en el puerto ${PORT}`));
