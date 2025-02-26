@@ -1,9 +1,8 @@
-
 body {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
-    background: url('flores.jpg') no-repeat center center/cover;
+    background: linear-gradient(to bottom, #ffdde1, #ee9ca7);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -11,7 +10,7 @@ body {
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
+    background: white;
     padding: 20px;
     border-radius: 15px;
     text-align: center;
