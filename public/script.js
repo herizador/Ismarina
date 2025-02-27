@@ -7,19 +7,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 🌸 Función para generar corazones flotantes
-    function createHeart() {
-        const heart = document.createElement("div");
-        heart.classList.add("heart");
-        heart.innerHTML = "💖";
-        document.body.appendChild(heart);
+    function crearCorazon() {
+    const corazon = document.createElement("div");
+    corazon.classList.add("heart");
+    corazon.innerHTML = "💖";
 
-        heart.style.left = Math.random() * 100 + "vw";
-        heart.style.animationDuration = Math.random() * 2 + 3 + "s";
+    corazon.style.left = Math.random() * window.innerWidth + "px";
+    corazon.style.top = Math.random() * window.innerHeight + "px";
 
-        setTimeout(() => {
-            heart.remove();
-        }, 5000);
-    }
+    document.body.appendChild(corazon);
 
-    setInterval(createHeart, 800);
+    setTimeout(() => {
+        corazon.remove();
+    }, 5000);
+}
+
+// Generar corazones cada cierto tiempo
+setInterval(crearCorazon, 800);
 });
