@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.querySelector(".container");
 
     slider.addEventListener("input", () => {
-        container.style.background = `rgba(255, 255, 255, ${slider.value})`;
+        slider.addEventListener("input", () => {
+    container.style.backgroundColor = `rgba(255, 255, 255, ${slider.value})`;
+});
     });
 });
