@@ -283,3 +283,11 @@ io.on("connection", (socket) => {
 app.listen(PORT, () => {
   console.log(`🚀 Servidor en http://localhost:${PORT}`);
 });
+
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "script-src 'self' https://cdn.jsdelivr.net;"
+  );
+  next();
+});
