@@ -1,6 +1,19 @@
 import { registerUser, loginUser } from './api.js';
 
 document.addEventListener("DOMContentLoaded", () => {
+  const registerForm = document.getElementById("registerForm");
+
+  registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    await registerUser(username, password);
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   const registerLink = document.getElementById("registerLink");
 
