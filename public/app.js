@@ -1,19 +1,6 @@
 import { registerUser, loginUser } from './api.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-  const registerForm = document.getElementById("registerForm");
-
-  registerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    await registerUser(username, password);
-  });
-});
-
-document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   const registerLink = document.getElementById("registerLink");
 
@@ -50,14 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await response.json();
 
     if (!response.ok) {
-      // Si la respuesta no es exitosa, mostrar el error
       throw new Error(data.error || "Error al registrar el usuario");
     }
 
-    // Si el registro es exitoso, mostrar un mensaje de éxito
     alert(data.message || "✅ Usuario registrado con éxito");
+    window.location.href = "login.html"; // Redirigir al login después del registro
   } catch (error) {
-    // Mostrar el error en caso de fallo
     alert(error.message);
   }
 }
@@ -75,34 +60,27 @@ async function loginUser(username, password) {
     const data = await response.json();
 
     if (!response.ok) {
-      // Si la respuesta no es exitosa, mostrar el error
       throw new Error(data.error || "Error al iniciar sesión");
     }
 
-    // Si el inicio de sesión es exitoso, guardar el token y redirigir al usuario
     localStorage.setItem("token", data.token);
     localStorage.setItem("username", username);
     window.location.href = "home.html"; // Redirigir a la página de inicio
   } catch (error) {
-    // Mostrar el error en caso de fallo
     alert(error.message);
   }
 }
   
-  // Manejador de eventos para el enlace de registro
-  registerLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    const username = prompt("Ingresa tu nombre de usuario:");
-    const password = prompt("Ingresa tu contraseña:");
-
-    if (username && password) {
-      try {
-        const response = await registerUser(username, password);
-        alert(response.message || "✅ Usuario registrado con éxito");
-      } catch (error) {
-        console.error("Error en el registro:", error);
-        alert("❌ Error en el servidor");
-      }
+    // Manejar el formulario de inicio de sesión
+    const loginForm = document.getElementById("loginForm");
+  
+    if (loginForm) {
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        await loginUser(username, password);
+      });
     }
   });
 });
