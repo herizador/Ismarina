@@ -10,6 +10,7 @@ import { body, validationResult } from "express-validator";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
+import path from "path"; // Importar el módulo 'path'
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Cambia esto a tu dominio en producción
+    origin: "https://ismarina.onrender.com", // Cambia esto a tu dominio en producción
   },
 });
 
@@ -29,6 +30,14 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
+
+// Servir archivos estáticos desde la carpeta 'public'
+app.use(express.static(path.join(__dirname, "public")));
+
+// Ruta raíz para servir index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // Conexión a MongoDB
 mongoose
