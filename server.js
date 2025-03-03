@@ -10,9 +10,14 @@ import { body, validationResult } from "express-validator";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
-import path from "path"; // Importar el módulo 'path'
+import { fileURLToPath } from "url"; // Importar fileURLToPath
+import path from "path"; // Importar path
 
 dotenv.config();
+
+// Definir __dirname en módulos de ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = createServer(app);
