@@ -48,6 +48,33 @@ document.addEventListener("DOMContentLoaded", () => {
     alert(error.message);
   }
 }
+
+async function loginUser(username, password) {
+  try {
+    const response = await fetch("https://ismarina.onrender.com/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Si la respuesta no es exitosa, mostrar el error
+      throw new Error(data.error || "Error al iniciar sesión");
+    }
+
+    // Si el inicio de sesión es exitoso, guardar el token y redirigir al usuario
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("username", username);
+    window.location.href = "home.html"; // Redirigir a la página de inicio
+  } catch (error) {
+    // Mostrar el error en caso de fallo
+    alert(error.message);
+  }
+}
   
   // Manejador de eventos para el enlace de registro
   registerLink.addEventListener("click", async (e) => {
