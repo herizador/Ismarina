@@ -158,17 +158,28 @@ app.post(
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const user = await User.findOne({ username });
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(400).json({ error: "❌ Credenciales incorrectas" });
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(400).json({ error: "❌ Usuario no encontrado" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: "❌ Contraseña incorrecta" });
+    }
+
+    // Generar token JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    // Devolver el token y un mensaje de éxito
+    res.json({ message: "✅ Inicio de sesión exitoso", token });
+  } catch (error) {
+    console.error("Error en el inicio de sesión:", error);
+    res.status(500).json({ error: "❌ Error en el servidor al iniciar sesión" });
   }
-
-  // Generar token JWT
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-  // Devolver el token y un mensaje de éxito
-  res.json({ message: "✅ Inicio de sesión exitoso", token });
 });
 
 // 📌 Diario de Amor
