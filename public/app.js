@@ -24,6 +24,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  async function registerUser(username, password) {
+  try {
+    const response = await fetch("https://ismarina.onrender.com/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Si la respuesta no es exitosa, mostrar el error
+      throw new Error(data.error || "Error al registrar el usuario");
+    }
+
+    // Si el registro es exitoso, mostrar un mensaje de éxito
+    alert(data.message || "✅ Usuario registrado con éxito");
+  } catch (error) {
+    // Mostrar el error en caso de fallo
+    alert(error.message);
+  }
+}
+  
   // Manejador de eventos para el enlace de registro
   registerLink.addEventListener("click", async (e) => {
     e.preventDefault();
