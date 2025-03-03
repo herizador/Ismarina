@@ -120,6 +120,7 @@ app.post(
     body("password").isLength({ min: 6 }).withMessage("La contraseña debe tener al menos 6 caracteres"),
   ],
   async (req, res) => {
+    // Validar los errores de express-validator
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -132,14 +133,25 @@ app.post(
       return res.status(400).json({ error: "❌ Solo Ismael y Marina pueden registrarse" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword });
-
     try {
-      await user.save();
-      res.status(201).json({ message: "✅ Usuario registrado con éxito" });
-    } catch (err) {
-      res.status(400).json({ error: "❌ El usuario ya existe" });
+      // Verificar si el usuario ya existe
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ error: "❌ El usuario ya existe" });
+      }
+
+      // Hash de la contraseña
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Crear y guardar el nuevo usuario
+      const newUser = new User({ username, password: hashedPassword });
+      await newUser.save();
+
+      // Respuesta de éxito
+      res.status(201).json({ message: "✅ Usuario registrado con éxito", user: newUser });
+    } catch (error) {
+      console.error("Error al registrar el usuario:", error);
+      res.status(500).json({ error: "❌ Error en el servidor al registrar el usuario" });
     }
   }
 );
