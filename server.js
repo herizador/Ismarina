@@ -293,16 +293,21 @@ app.post("/notificaciones", async (req, res) => {
 });
 
 // Socket.io para notificaciones en tiempo real
+// Socket.io para notificaciones en tiempo real
 io.on("connection", (socket) => {
   console.log("Usuario conectado:", socket.id);
 
   socket.on("sendHeart", async (user) => {
-    const heartData = await Heart.findOneAndUpdate(
-      { user },
-      { $inc: { count: 1 } },
-      { new: true, upsert: true }
-    );
-    io.emit("updateHearts", heartData);
+    try {
+      const heartData = await Heart.findOneAndUpdate(
+        { user },
+        { $inc: { count: 1 } },
+        { new: true, upsert: true }
+      );
+      io.emit("updateHearts", heartData); // Emitir actualización a todos los clientes
+    } catch (error) {
+      console.error("Error al actualizar corazones:", error);
+    }
   });
 
   socket.on("disconnect", () => {
