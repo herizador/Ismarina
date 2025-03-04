@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { OpenAI } from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai"; // Importar Gemini
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import helmet from "helmet";
@@ -10,8 +10,8 @@ import { body, validationResult } from "express-validator";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url"; // Importar fileURLToPath
-import path from "path"; // Importar path
+import { fileURLToPath } from "url";
+import path from "path";
 
 dotenv.config();
 
@@ -28,7 +28,13 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Configurar Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+// Variable para almacenar el estado de la conversación
+let isWaitingForResponse = false;
 
 // Middleware
 app.use(cors());
@@ -95,20 +101,35 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// 📌 Asistente Virtual con IA
+// 📌 Asistente Virtual con Gemini
 app.post("/asistente", async (req, res) => {
   try {
     const { message } = req.body;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: message }],
-    });
+    // Si el asistente está esperando una respuesta, procesa el mensaje del usuario
+    if (isWaitingForResponse) {
+      const prompt = `El usuario respondió: "${message}". Responde de manera breve (un párrafo como máximo).`;
+      const result = await model.generateContent(prompt);
+      const response = await result.response.text();
 
-    res.json({ response: completion.choices[0].message.content });
+      // Reiniciar el estado para la próxima interacción
+      isWaitingForResponse = false;
+
+      res.json({ response });
+    } else {
+      // Si no está esperando una respuesta, pregunta cómo ha ido el día
+      const prompt = "¿Cómo ha ido tu día?";
+      const result = await model.generateContent(prompt);
+      const response = await result.response.text();
+
+      // Indicar que el asistente está esperando una respuesta
+      isWaitingForResponse = true;
+
+      res.json({ response });
+    }
   } catch (error) {
-    console.error("Error en OpenAI:", error);
-    res.status(500).json({ error: "❌ Error con OpenAI" });
+    console.error("Error en el asistente:", error);
+    res.status(500).json({ error: "❌ Error en el asistente" });
   }
 });
 
