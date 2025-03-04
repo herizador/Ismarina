@@ -104,31 +104,30 @@ function authenticateToken(req, res, next) {
 // 📌 Asistente Virtual con Gemini
 app.post("/asistente", async (req, res) => {
   try {
+    console.log("Solicitud recibida en /asistente"); // Log de depuración
     const { message } = req.body;
 
-    // Si el asistente está esperando una respuesta, procesa el mensaje del usuario
     if (isWaitingForResponse) {
+      console.log("Procesando respuesta del usuario:", message); // Log de depuración
       const prompt = `El usuario respondió: "${message}". Responde de manera breve (un párrafo como máximo).`;
       const result = await model.generateContent(prompt);
       const response = await result.response.text();
 
-      // Reiniciar el estado para la próxima interacción
       isWaitingForResponse = false;
-
+      console.log("Respuesta generada:", response); // Log de depuración
       res.json({ response });
     } else {
-      // Si no está esperando una respuesta, pregunta cómo ha ido el día
+      console.log("Haciendo pregunta inicial"); // Log de depuración
       const prompt = "¿Cómo ha ido tu día?";
       const result = await model.generateContent(prompt);
       const response = await result.response.text();
 
-      // Indicar que el asistente está esperando una respuesta
       isWaitingForResponse = true;
-
+      console.log("Pregunta inicial generada:", response); // Log de depuración
       res.json({ response });
     }
   } catch (error) {
-    console.error("Error en el asistente:", error);
+    console.error("Error en el asistente:", error); // Log de depuración
     res.status(500).json({ error: "❌ Error en el asistente" });
   }
 });
