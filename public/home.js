@@ -290,3 +290,25 @@ sendLoveMessage.addEventListener("click", async () => {
     }
   }
 });
+
+// Escuchar actualizaciones del contador de corazones
+socket.on("updateHearts", (heartData) => {
+  const heartCountElement = document.getElementById("heartCount");
+  if (heartCountElement) {
+    heartCountElement.textContent = `Corazones enviados hoy: ${heartData.count}`;
+  }
+});
+
+// Función para enviar un corazón
+async function sendHeart() {
+  const username = localStorage.getItem("username");
+  if (username) {
+    socket.emit("sendHeart", username);
+  }
+}
+
+// Asignar evento al botón de enviar corazón
+const sendHeartButton = document.getElementById("sendHeartButton");
+if (sendHeartButton) {
+  sendHeartButton.addEventListener("click", sendHeart);
+}
