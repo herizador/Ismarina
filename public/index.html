@@ -6,6 +6,7 @@
   <title>Ismarina 💖</title>
   <link rel="icon" type="image/jpeg" href="assets/melody.jpg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,10 +22,10 @@
         <h1 class="card-title text-center mb-4" style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #ff6b6b;">Bienvenida, Marina 💖</h1>
         <form id="loginForm">
           <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Nombre de usuario" required>
+            <input type="text" id="username" class="form-control" placeholder="Nombre de usuario" required>
           </div>
           <div class="mb-3">
-            <input type="password" class="form-control" placeholder="Contraseña" required>
+            <input type="password" id="password" class="form-control" placeholder="Contraseña" required>
           </div>
           <button type="submit" class="btn btn-romantic w-100">Iniciar sesión</button>
         </form>
@@ -33,7 +34,8 @@
     </div>
   </div>
 
-  <script type="module" src="/app.js"></script>
+  <!-- Scripts -->
   <script src="bootstrap.bundle.min.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
