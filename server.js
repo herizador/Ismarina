@@ -31,7 +31,7 @@ const PORT = process.env.PORT || 3000;
 
 // Configurar Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "Gemini 2.0 Pro Experimental 02-05" });
 
 // Variable para almacenar el estado de la conversación
 let isWaitingForResponse = false;
