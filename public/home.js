@@ -17,7 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const username = localStorage.getItem("username"); // Guardar el nombre 
-
+  if (!username) {
+  window.location.href = "index.html"; // Redirigir al login si no hay usuario
+  }
+  
   // Elementos del DOM
   const diaryEntry = document.getElementById("diaryEntry");
   const saveDiary = document.getElementById("saveDiary");
