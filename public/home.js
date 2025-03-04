@@ -75,20 +75,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Manejador de eventos para enviar un mensaje al asistente virtual
   sendChat.addEventListener("click", async () => {
-    const message = chatInput.value.trim();
-    if (message) {
-      try {
-        const response = await askAI(message);
-        chat.innerHTML += `<p><strong>Tú:</strong> ${message}</p>`;
-        chat.innerHTML += `<p><strong>Asistente:</strong> ${response.response}</p>`;
-        chatInput.value = "";
-        chat.scrollTop = chat.scrollHeight;
-      } catch (error) {
-        console.error("Error en el chat:", error);
-        showToast("❌ Error en el chat", "danger");
-      }
+  const message = chatInput.value.trim();
+  if (message) {
+    try {
+      const response = await askAI(message);
+      chat.innerHTML += `<p><strong>Tú:</strong> ${message}</p>`;
+      chat.innerHTML += `<p><strong>Asistente:</strong> ${response.response}</p>`;
+      chatInput.value = "";
+      chat.scrollTop = chat.scrollHeight;
+    } catch (error) {
+      console.error("Error en el chat:", error);
+      showToast("❌ Error en el chat", "danger");
     }
-  });
+  }
+});
 
   // Manejador de eventos para cerrar sesión
   logoutButton.addEventListener("click", () => {
