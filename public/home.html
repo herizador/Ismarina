@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js;">
+  <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js;"> -->
   <title>Ismarina 💖 - Inicio</title>
   <link rel="icon" type="image/jpeg" href="assets/melody.jpg">
   <link rel="stylesheet" href="bootstrap.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="fullcalendar/main.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -71,16 +71,26 @@
       </div>
     </div>
 
+    <!-- Mensajes de Amor -->
     <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-          <h2 class="card-title">Mensajes de Amor 💌</h2>
-          <textarea id="loveMessage" class="form-control mb-2" placeholder="Escribe un mensaje de amor..." rows="4"></textarea>
-          <button id="sendLoveMessage" class="btn btn-romantic w-100">Enviar</button>
-        </div>
+      <div class="card-body">
+        <h2 class="card-title">Mensajes de Amor 💌</h2>
+        <textarea id="loveMessage" class="form-control mb-2" placeholder="Escribe un mensaje de amor..." rows="4"></textarea>
+        <button id="sendLoveMessage" class="btn btn-romantic w-100">Enviar</button>
       </div>
+    </div>
+
+    <!-- Contador de Corazones -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title">Corazones Enviados 💖</h2>
+        <p id="heartCount">Corazones enviados hoy: 0</p>
+        <button id="sendHeartButton" class="btn btn-romantic w-100">Enviar Corazón</button>
+      </div>
+    </div>
 
     <!-- Chat con el Asistente Virtual -->
-    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn>
+    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn">
       <div class="card-body">
         <h2 class="card-title">Asistente Virtual 💬</h2>
         <div id="chat" class="bg-pink-50 p-3 rounded mb-2" style="height: 150px; overflow-y: auto;">
@@ -92,8 +102,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-  <script src="fullcalendar.min.js"></script>
+  <script src="fullcalendar/main.min.js"></script>
   <script src="bootstrap.bundle.min.js"></script>
   <script type="module" src="home.js"></script>
 </body>
