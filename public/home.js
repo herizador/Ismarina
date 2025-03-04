@@ -16,11 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "index.html"; // Redirigir al login si no hay token
   }
 
-  const username = localStorage.getItem("username"); // Guardar el nombre 
+  const username = localStorage.getItem("username"); // Obtener el nombre de usuario
   if (!username) {
-  window.location.href = "index.html"; // Redirigir al login si no hay usuario
+    window.location.href = "index.html"; // Redirigir al login si no hay usuario
   }
-  
+
   // Elementos del DOM
   const diaryEntry = document.getElementById("diaryEntry");
   const saveDiary = document.getElementById("saveDiary");
@@ -110,6 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // Función para cargar las entradas del diario del usuario actual
 async function loadDiaryEntries() {
   try {
+    const username = localStorage.getItem("username");
+    if (!username) {
+      throw new Error("Usuario no encontrado");
+    }
+
     const entries = await getDiaryEntries(username);
     // Mostrar las entradas en el DOM
   } catch (error) {
@@ -121,6 +126,11 @@ async function loadDiaryEntries() {
 // Función para cargar los recuerdos privados
 async function loadPrivateMemories() {
   try {
+    const username = localStorage.getItem("username");
+    if (!username) {
+      throw new Error("Usuario no encontrado");
+    }
+
     const memories = await getPrivateMemories(username);
     // Mostrar los recuerdos en el DOM
   } catch (error) {
@@ -132,6 +142,11 @@ async function loadPrivateMemories() {
 // Función para cargar las notificaciones
 async function loadNotifications() {
   try {
+    const username = localStorage.getItem("username");
+    if (!username) {
+      throw new Error("Usuario no encontrado");
+    }
+
     const notificationsData = await getNotifications(username);
     // Mostrar las notificaciones en el DOM
   } catch (error) {
@@ -159,17 +174,19 @@ function crearCorazon() {
 // Función para generar frases románticas con IA
 async function generateRomanticMessage() {
   try {
-    // Obtener las entradas del diario y los recuerdos
+    const username = localStorage.getItem("username");
+    if (!username) {
+      throw new Error("Usuario no encontrado");
+    }
+
     const diaryEntries = await getDiaryEntries(username);
     const privateMemories = await getPrivateMemories(username);
 
-    // Combinar el contenido del diario y los recuerdos
     const context = [
       ...diaryEntries.map((entry) => entry.entry),
       ...privateMemories.map((memory) => memory.memory),
     ].join(" ");
 
-    // Enviar el contexto a la IA para generar una frase romántica
     const response = await askAI(`Genera una frase romántica basada en este contexto: ${context}`);
     return response.response;
   } catch (error) {
