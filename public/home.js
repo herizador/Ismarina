@@ -1,3 +1,4 @@
+import { io } from "socket.io-client";
 import {
   getDiaryEntries,
   addDiaryEntry,
@@ -9,6 +10,9 @@ import {
   getHearts,
   addHeart,
 } from './api.js';
+
+// Conectar al servidor de Socket.IO
+const socket = io("https://ismarina.onrender.com");
 
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
@@ -31,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatInput = document.getElementById("chatInput");
   const sendChat = document.getElementById("sendChat");
   const logoutButton = document.getElementById("logoutButton");
+  const sendHeartButton = document.getElementById("sendHeartButton");
 
   // Cargar datos iniciales
   loadInitialData();
