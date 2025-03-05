@@ -314,5 +314,10 @@ async function sendHeart() {
 // Asignar evento al botón de enviar corazón
 const sendHeartButton = document.getElementById("sendHeartButton");
 if (sendHeartButton) {
-  sendHeartButton.addEventListener("click", sendHeart);
+  sendHeartButton.addEventListener("click", () => {
+    const username = localStorage.getItem("username");
+    if (username) {
+      socket.emit("sendHeart", username);
+    }
+  });
 }
