@@ -23,7 +23,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://ismarina.onrender.com", // Cambia esto a tu dominio en producción
+    origin: "https://ismarina.onrender.com",
+    methods: ["GET", "POST"],
   },
 });
 
