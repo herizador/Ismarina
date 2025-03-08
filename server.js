@@ -321,6 +321,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "https://cdn.socket.io", "'unsafe-inline'"],
+        scriptSrcElem: ["'self'", "https://cdn.socket.io", "'unsafe-inline'"],
         connectSrc: ["'self'", "https://ismarina.onrender.com"],
         imgSrc: ["'self'", "data:", "https://ismarina.onrender.com"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
