@@ -36,6 +36,12 @@
           <li class="nav-item">
             <a class="nav-link" href="#asistente">Asistente</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#notificaciones">Notificaciones</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#mensajes">Mensajes</a>
+          </li>
         </ul>
         <button id="logoutButton" class="btn btn-outline-danger">Cerrar sesión</button>
       </div>
@@ -113,6 +119,33 @@
               <input id="chatInput" type="text" class="form-control" placeholder="Escribe un mensaje...">
               <button id="sendChat" class="btn btn-romantic">Enviar</button>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Notificaciones -->
+    <section id="notificaciones" class="row justify-content-center py-5 d-none">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title h4">Notificaciones</h2>
+            <div id="notifications" class="bg-pink-50 p-3 rounded">
+              <!-- Notificaciones aparecerán aquí -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Mensajes de Amor -->
+    <section id="mensajes" class="row justify-content-center py-5 d-none">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title h4">Mensajes de Amor 💌</h2>
+            <textarea id="loveMessage" class="form-control mb-3" placeholder="Escribe un mensaje de amor..." rows="5"></textarea>
+            <button id="sendLoveMessage" class="btn btn-romantic w-100">Enviar</button>
           </div>
         </div>
       </div>
