@@ -8,103 +8,146 @@
   <link rel="stylesheet" href="bootstrap.min.css">
   <link rel="stylesheet" href="/fullcalendar/main.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <!-- Navbar mejorada -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Ismarina 💖</a>
+      <a class="navbar-brand" href="#inicio">Ismarina 💖</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <button id="logoutButton" class="btn btn-outline-danger">Cerrar sesión</button>
+            <a class="nav-link" href="#diario">Diario</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#recuerdos">Recuerdos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#calendario">Calendario</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#corazones">Corazones</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#asistente">Asistente</a>
           </li>
         </ul>
+        <button id="logoutButton" class="btn btn-outline-danger">Cerrar sesión</button>
       </div>
     </div>
   </nav>
 
-  <!-- Contenedor principal -->
-  <div class="container mt-4 animate__animated animate__fadeIn">
-    <h1 class="text-center mb-4" style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #ff6b6b;">¡Hola, Marina! 💖</h1>
-
-    <!-- Diario de Amor -->
-    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn">
-      <div class="card-body">
-        <h2 class="card-title">Diario de Amor</h2>
-        <textarea id="diaryEntry" class="form-control mb-2" placeholder="Escribe una entrada en tu diario..." rows="4"></textarea>
-        <button id="saveDiary" class="btn btn-romantic w-100">Guardar</button>
+  <!-- Contenido principal con secciones -->
+  <main class="container-fluid mt-5 pt-4">
+    <!-- Sección Inicio -->
+    <section id="inicio" class="row justify-content-center animate__animated animate__fadeIn">
+      <div class="col-12 text-center mb-4">
+        <h1 class="display-4" style="font-family: 'Dancing Script', cursive; color: #ff6b6b;">¡Hola, Marina! 💖</h1>
       </div>
-    </div>
+    </section>
 
-    <!-- Recuerdos Privados -->
-    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn">
-      <div class="card-body">
-        <h2 class="card-title">Recuerdos Privados</h2>
-        <textarea id="privateMemory" class="form-control mb-2" placeholder="Escribe un recuerdo privado..." rows="4"></textarea>
-        <button id="saveMemory" class="btn btn-romantic w-100">Guardar</button>
-      </div>
-    </div>
-
-    <!-- Calendario de Fechas Especiales -->
-    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn">
-      <div class="card-body">
-        <h2 class="card-title">Calendario de Fechas Especiales</h2>
-        <div id="calendar" class="bg-white p-3 rounded">
-          <!-- El calendario se generará aquí -->
+    <!-- Sección Diario -->
+    <section id="diario" class="row justify-content-center py-5 d-none">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <h2 class="card-title h4">Diario de Amor</h2>
+            <textarea id="diaryEntry" class="form-control mb-3" placeholder="Escribe una entrada en tu diario..." rows="5"></textarea>
+            <button id="saveDiary" class="btn btn-romantic w-100">Guardar</button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Notificaciones -->
-    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn">
-      <div class="card-body">
-        <h2 class="card-title">Notificaciones</h2>
-        <div id="notifications" class="bg-pink-50 p-3 rounded">
-          <!-- Notificaciones aparecerán aquí -->
+    <!-- Sección Recuerdos -->
+    <section id="recuerdos" class="row justify-content-center py-5 d-none">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <h2 class="card-title h4">Recuerdos Privados</h2>
+            <textarea id="privateMemory" class="form-control mb-3" placeholder="Escribe un recuerdo privado..." rows="5"></textarea>
+            <button id="saveMemory" class="btn btn-romantic w-100">Guardar</button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Mensajes de Amor -->
-    <div class="card mb-4 shadow-sm">
-      <div class="card-body">
-        <h2 class="card-title">Mensajes de Amor 💌</h2>
-        <textarea id="loveMessage" class="form-control mb-2" placeholder="Escribe un mensaje de amor..." rows="4"></textarea>
-        <button id="sendLoveMessage" class="btn btn-romantic w-100">Enviar</button>
-      </div>
-    </div>
-
-    <!-- Contador de Corazones -->
-    <div class="card mb-4 shadow-sm">
-      <div class="card-body">
-        <h2 class="card-title">Corazones Enviados 💖</h2>
-        <p id="heartCount">Corazones enviados hoy: 0</p>
-        <button id="sendHeartButton" class="btn btn-romantic w-100">Enviar Corazón</button>
-      </div>
-    </div>
-
-    <!-- Chat con el Asistente Virtual -->
-    <div class="card mb-4 shadow-sm animate__animated animate__fadeIn">
-      <div class="card-body">
-        <h2 class="card-title">Asistente Virtual 💬</h2>
-        <div id="chat" class="bg-pink-50 p-3 rounded mb-2" style="height: 150px; overflow-y: auto;">
-          <!-- Mensajes del chat aparecerán aquí -->
+    <!-- Sección Calendario -->
+    <section id="calendario" class="row justify-content-center py-5 d-none">
+      <div class="col-md-10 col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title h4">Calendario de Fechas Especiales</h2>
+            <div id="calendar" class="bg-white p-3 rounded"></div>
+          </div>
         </div>
-        <input id="chatInput" type="text" class="form-control mb-2" placeholder="Escribe un mensaje...">
-        <button id="sendChat" class="btn btn-romantic w-100">Enviar</button>
       </div>
-    </div>
-  </div>
+    </section>
+
+    <!-- Sección Corazones -->
+    <section id="corazones" class="row justify-content-center py-5 d-none">
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body text-center">
+            <h2 class="card-title h4">Corazones Enviados 💖</h2>
+            <p id="heartCount" class="fs-5">Corazones enviados hoy: 0</p>
+            <button id="sendHeartButton" class="btn btn-romantic w-100">Enviar Corazón</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Asistente -->
+    <section id="asistente" class="row justify-content-center py-5 d-none">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title h4">Asistente Virtual 💬</h2>
+            <div id="chat" class="bg-pink-50 p-3 rounded mb-3" style="height: 200px; overflow-y: auto;"></div>
+            <div class="input-group">
+              <input id="chatInput" type="text" class="form-control" placeholder="Escribe un mensaje...">
+              <button id="sendChat" class="btn btn-romantic">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <!-- Scripts -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="/fullcalendar/main.min.js"></script>
   <script src="bootstrap.bundle.min.js"></script>
   <script type="module" src="home.js"></script>
+  
+  <!-- Script para navegación -->
+  <script>
+    // Manejo de la navegación
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        document.querySelectorAll('section').forEach(section => {
+          section.classList.add('d-none');
+        });
+        document.getElementById(targetId).classList.remove('d-none');
+        
+        // Actualizar clase activa en navegación
+        document.querySelectorAll('.nav-link').forEach(navLink => {
+          navLink.classList.remove('active');
+        });
+        link.classList.add('active');
+      });
+    });
+
+    // Mostrar sección inicial
+    document.getElementById('diario').classList.remove('d-none');
+    document.querySelector('.nav-link[href="#diario"]').classList.add('active');
+  </script>
 </body>
 </html>
