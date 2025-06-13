@@ -6,10 +6,10 @@ PORT=3000
 
 # MongoDB Connection String
 # Reemplaza con tu URL real de MongoDB Atlas
-MONGODB_URI=mongodb+srv://tu_usuario:tu_password@cluster0.xxxxx.mongodb.net/ismarina_db?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://ismel386827:M0ng0DB2005@ismarina.jqeit.mongodb.net/?retryWrites=true&w=majority&appName=Ismarina
 
 # JWT Secret para autenticación (genera uno seguro)
-JWT_SECRET=tu_jwt_secret_super_seguro_aqui_cambialo_por_favor
+JWT_SECRET=330d9aadd5439aa8975e38b31e4c06a1
 
 # Entorno de producción
 NODE_ENV=production
