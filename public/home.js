@@ -1,323 +1,239 @@
-import {
-  getDiaryEntries,
-  addDiaryEntry,
-  getPrivateMemories,
-  addPrivateMemory,
-  getNotifications,
-  addNotification,
-  askAI,
-  getHearts,
-  addHeart,
-} from './api.js';
+// home.js - Frontend corregido
+let socket = null;
+let romanticMessageInterval = null;
+let currentUser = null;
 
-// Conectar al servidor de Socket.IO
-const socket = io("https://ismarina.onrender.com");
-
-document.addEventListener("DOMContentLoaded", () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    window.location.href = "index.html"; // Redirigir al login si no hay token
-  }
-
-  const username = localStorage.getItem("username"); // Obtener el nombre de usuario
-  if (!username) {
-    window.location.href = "index.html"; // Redirigir al login si no hay usuario
-  }
-
-  // Elementos del DOM
-  const diaryEntry = document.getElementById("diaryEntry");
-  const saveDiary = document.getElementById("saveDiary");
-  const privateMemory = document.getElementById("privateMemory");
-  const saveMemory = document.getElementById("saveMemory");
-  const notifications = document.getElementById("notifications");
-  const chat = document.getElementById("chat");
-  const chatInput = document.getElementById("chatInput");
-  const sendChat = document.getElementById("sendChat");
-  const logoutButton = document.getElementById("logoutButton");
-  const sendHeartButton = document.getElementById("sendHeartButton");
-
-  // Cargar datos iniciales
-  loadInitialData();
-
-  // Manejador de eventos para guardar una entrada en el diario
-  saveDiary.addEventListener("click", async () => {
-    const entry = diaryEntry.value.trim();
-    if (entry) {
-      showLoading("Guardando entrada...");
-      try {
-        await addDiaryEntry(username, entry);
-        diaryEntry.value = "";
-        loadDiaryEntries();
-        showToast("Entrada guardada con éxito", "success");
-      } catch (error) {
-        console.error("Error al guardar la entrada:", error);
-        showToast("❌ Error al guardar la entrada", "danger");
-      } finally {
-        hideLoading();
-      }
+// Inicializar aplicación
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando aplicación de amor...');
+    
+    // Verificar autenticación
+    if (!isAuthenticated()) {
+        window.location.href = '/';
+        return;
     }
-  });
+    
+    currentUser = getCurrentUser();
+    console.log(`👤 Usuario actual: ${currentUser}`);
+    
+    // Personalizar saludo
+    updateWelcomeMessage();
+    
+    // Inicializar Socket.io
+    initializeSocket();
+    
+    // Cargar mensajes existentes
+    loadMessages();
+    
+    // Configurar eventos
+    setupEventListeners();
+    
+    // Iniciar mensajes románticos automáticos
+    startRomanticMessages();
+    
+    console.log('✅ Aplicación inicializada');
+});
 
-  // Manejador de eventos para guardar un recuerdo privado
-  saveMemory.addEventListener("click", async () => {
-    const memory = privateMemory.value.trim();
-    if (memory) {
-      showLoading("Guardando recuerdo...");
-      try {
-        await addPrivateMemory(username, memory);
-        privateMemory.value = "";
-        loadPrivateMemories();
-        showToast("Recuerdo guardado con éxito", "success");
-      } catch (error) {
-        console.error("Error al guardar el recuerdo:", error);
-        showToast("❌ Error al guardar el recuerdo", "danger");
-      } finally {
-        hideLoading();
-      }
+// Actualizar mensaje de bienvenida
+function updateWelcomeMessage() {
+    const welcomeElement = document.querySelector('.welcome-message');
+    if (welcomeElement) {
+        if (currentUser === 'marina') {
+            welcomeElement.innerHTML = '💖 Bienvenida, Marina mi amor 💖';
+        } else if (currentUser === 'ismael') {
+            welcomeElement.innerHTML = '💖 Bienvenido, Ismael mi amor 💖';
+        }
     }
-  });
+}
 
-  // Manejador de eventos para enviar un mensaje al asistente virtual
-  sendChat.addEventListener("click", async () => {
-  const message = chatInput.value.trim();
-  if (message) {
+// Inicializar Socket.io con manejo de errores
+function initializeSocket() {
     try {
-      const response = await askAI(message);
-      chat.innerHTML += `<p><strong>Tú:</strong> ${message}</p>`;
-      chat.innerHTML += `<p><strong>Asistente:</strong> ${response.response}</p>`;
-      chatInput.value = "";
-      chat.scrollTop = chat.scrollHeight;
+        console.log('🔌 Conectando a Socket.io...');
+        
+        socket = io(window.location.origin, {
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5,
+            timeout: 20000
+        });
+
+        socket.on('connect', () => {
+            console.log('✅ Conectado a Socket.io');
+            showNotification('Conectado al chat de amor ❤️', 'success');
+            
+            // Unirse al chat
+            socket.emit('join', { username: currentUser });
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('❌ Socket.io desconectado:', reason);
+            showNotification('Conexión perdida, reintentando...', 'warning');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.log('❌ Error de conexión Socket.io:', error);
+            // No mostrar error al usuario, seguir funcionando sin socket
+        });
+
+        socket.on('newMessage', (message) => {
+            console.log('📨 Nuevo mensaje recibido:', message);
+            displayMessage(message);
+        });
+
+        socket.on('userJoined', (userData) => {
+            const partnerName = userData.username === 'marina' ? 'Marina' : 'Ismael';
+            showNotification(`${partnerName} se conectó ❤️`, 'info');
+        });
+
     } catch (error) {
-      console.error("Error en el chat:", error);
-      showToast("❌ Error en el chat", "danger");
+        console.error('❌ Error inicializando Socket.io:', error);
+        // Continuar sin socket si hay error
     }
-  }
-});
+}
 
-  // Manejador de eventos para cerrar sesión
-  logoutButton.addEventListener("click", () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    window.location.href = "index.html";
-  });
-
-  // Generar corazones flotantes
-  setInterval(crearCorazon, 800);
-
-  // Generar mensajes románticos cada 10 segundos
-  setInterval(addRomanticMessage, 10000);
-
-  // Generar el calendario
-  generateCalendar();
-});
-
-// Función para cargar las entradas del diario del usuario actual
-async function loadDiaryEntries() {
-  try {
-    const username = localStorage.getItem("username");
-    if (!username) {
-      throw new Error("Usuario no encontrado");
+// Configurar event listeners
+function setupEventListeners() {
+    // Botón de logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
     }
-
-    const entries = await getDiaryEntries(username);
-    // Mostrar las entradas en el DOM
-  } catch (error) {
-    console.error("Error al cargar el diario:", error);
-    showToast("❌ Error al cargar el diario", "danger");
-  }
-}
-
-// Función para cargar los recuerdos privados
-async function loadPrivateMemories() {
-  try {
-    const username = localStorage.getItem("username");
-    if (!username) {
-      throw new Error("Usuario no encontrado");
+    
+    // Formulario de mensaje
+    const messageForm = document.getElementById('messageForm');
+    if (messageForm) {
+        messageForm.addEventListener('submit', handleMessageSubmit);
     }
-
-    const memories = await getPrivateMemories(username);
-    // Mostrar los recuerdos en el DOM
-  } catch (error) {
-    console.error("Error al cargar los recuerdos:", error);
-    showToast("❌ Error al cargar los recuerdos", "danger");
-  }
-}
-
-// Función para cargar las notificaciones
-async function loadNotifications() {
-  try {
-    const username = localStorage.getItem("username");
-    if (!username) {
-      throw new Error("Usuario no encontrado");
+    
+    // Botones de funciones especiales
+    const memoryBtn = document.getElementById('addMemoryBtn');
+    if (memoryBtn) {
+        memoryBtn.addEventListener('click', () => addSpecialMessage('memory'));
     }
-
-    const notificationsData = await getNotifications(username);
-    // Mostrar las notificaciones en el DOM
-  } catch (error) {
-    console.error("Error al cargar las notificaciones:", error);
-    showToast("❌ Error al cargar las notificaciones", "danger");
-  }
-}
-
-// Función para generar corazones flotantes
-function crearCorazon() {
-  const corazon = document.createElement("div");
-  corazon.classList.add("heart");
-  corazon.innerHTML = "💖";
-
-  corazon.style.left = Math.random() * window.innerWidth + "px";
-  corazon.style.top = Math.random() * window.innerHeight + "px";
-
-  document.body.appendChild(corazon);
-
-  setTimeout(() => {
-    corazon.remove();
-  }, 5000);
-}
-
-// Función para generar frases románticas con IA
-async function generateRomanticMessage() {
-  try {
-    const username = localStorage.getItem("username");
-    if (!username) {
-      throw new Error("Usuario no encontrado");
+    
+    const romanticBtn = document.getElementById('romanticBtn');
+    if (romanticBtn) {
+        romanticBtn.addEventListener('click', () => addSpecialMessage('romantic'));
     }
-
-    const diaryEntries = await getDiaryEntries(username);
-    const privateMemories = await getPrivateMemories(username);
-
-    const context = [
-      ...diaryEntries.map((entry) => entry.entry),
-      ...privateMemories.map((memory) => memory.memory),
-    ].join(" ");
-
-    const response = await askAI(`Genera una frase romántica basada en este contexto: ${context}`);
-    return response.response;
-  } catch (error) {
-    console.error("Error al generar la frase romántica:", error);
-    return "Eres lo mejor que me ha pasado 💖"; // Mensaje predeterminado en caso de error
-  }
+    
+    const adviceBtn = document.getElementById('adviceBtn');
+    if (adviceBtn) {
+        adviceBtn.addEventListener('click', () => addSpecialMessage('advice'));
+    }
 }
 
-// Función para agregar un mensaje romántico al chat
-async function addRomanticMessage() {
-  const romanticMessage = await generateRomanticMessage();
-  chat.innerHTML += `<p><strong>Asistente:</strong> ${romanticMessage}</p>`;
-  chat.scrollTop = chat.scrollHeight;
+// Manejar envío de mensajes
+async function handleMessageSubmit(e) {
+    e.preventDefault();
+    
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    if (!message) return;
+    
+    try {
+        // Enviar mensaje via API
+        await sendMessage(message, 'user');
+        
+        // También enviar via socket si está disponible
+        if (socket && socket.connected) {
+            socket.emit('sendMessage', {
+                sender: currentUser,
+                content: message,
+                type: 'user'
+            });
+        }
+        
+        messageInput.value = '';
+        console.log('✅ Mensaje enviado');
+        
+    } catch (error) {
+        console.error('❌ Error enviando mensaje:', error);
+        showNotification('Error enviando mensaje', 'error');
+    }
 }
 
-// Función para mostrar un mensaje de carga
-function showLoading(message) {
-  const loadingElement = document.createElement("div");
-  loadingElement.className = "loading-message";
-  loadingElement.textContent = message;
-  document.body.appendChild(loadingElement);
+// Cargar mensajes existentes
+async function loadMessages() {
+    try {
+        console.log('📥 Cargando mensajes...');
+        const messages = await getMessages();
+        
+        const chatContainer = document.getElementById('chatMessages');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';
+            messages.reverse().forEach(message => displayMessage(message));
+        }
+        
+        console.log(`✅ ${messages.length} mensajes cargados`);
+    } catch (error) {
+        console.error('❌ Error cargando mensajes:', error);
+        showNotification('Error cargando mensajes', 'error');
+    }
 }
 
-// Función para ocultar el mensaje de carga
-function hideLoading() {
-  const loadingElement = document.querySelector(".loading-message");
-  if (loadingElement) {
-    loadingElement.remove();
-  }
-}
-
-// Función para generar el calendario
-function generateCalendar() {
-  const calendarEl = document.getElementById("calendar");
-  if (calendarEl) {
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: "dayGridMonth",
-      events: [
-        { title: "Nuestro aniversario 💖", date: "2023-10-15" },
-        { title: "Navidad juntos 🎄", date: "2023-12-25" },
-        { title: "Día de San Valentín 🌹", date: "2024-02-14" },
-      ],
+// Mostrar mensaje en el chat
+function displayMessage(message) {
+    const chatContainer = document.getElementById('chatMessages');
+    if (!chatContainer) return;
+    
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${getMessageClass(message)}`;
+    
+    const timestamp = new Date(message.timestamp).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
     });
-    calendar.render();
-  }
+    
+    messageElement.innerHTML = `
+        <div class="message-header">
+            <span class="sender">${getDisplayName(message.sender)}</span>
+            <span class="timestamp">${timestamp}</span>
+        </div>
+        <div class="message-content">${message.content}</div>
+    `;
+    
+    chatContainer.appendChild(messageElement);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Función para cargar datos iniciales de manera asíncrona
-async function loadInitialData() {
-  showLoading("Cargando datos...");
-  try {
-    await loadDiaryEntries();
-    await loadPrivateMemories();
-    await loadNotifications();
-  } catch (error) {
-    console.error("Error al cargar los datos:", error);
-  } finally {
-    hideLoading();
-  }
+// Obtener clase CSS para el mensaje
+function getMessageClass(message) {
+    if (message.sender === currentUser) return 'message-own';
+    if (message.sender === 'Asistente IA') return 'message-ai';
+    return 'message-other';
 }
 
-// Función para mostrar un mensaje de notificación
-function showToast(message, type = "success") {
-  const toastContainer = document.createElement("div");
-  toastContainer.className = `toast align-items-center text-white bg-${type} border-0`;
-  toastContainer.setAttribute("role", "alert");
-  toastContainer.setAttribute("aria-live", "assertive");
-  toastContainer.setAttribute("aria-atomic", "true");
-
-  const toastBody = document.createElement("div");
-  toastBody.className = "d-flex";
-  toastBody.innerHTML = `
-    <div class="toast-body">${message}</div>
-    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-  `;
-
-  toastContainer.appendChild(toastBody);
-  document.body.appendChild(toastContainer);
-
-  const toast = new bootstrap.Toast(toastContainer);
-  toast.show();
-
-  setTimeout(() => {
-    toastContainer.remove();
-  }, 3000);
+// Obtener nombre para mostrar
+function getDisplayName(sender) {
+    if (sender === 'marina') return 'Marina 💕';
+    if (sender === 'ismael') return 'Ismael ❤️';
+    if (sender === 'Asistente IA') return 'Asistente de Amor 🤖';
+    return sender;
 }
 
-const loveMessage = document.getElementById("loveMessage");
-const sendLoveMessage = document.getElementById("sendLoveMessage");
-
-sendLoveMessage.addEventListener("click", async () => {
-  const message = loveMessage.value.trim();
-  if (message) {
+// Añadir mensaje especial (recuerdo, romántico, consejo)
+async function addSpecialMessage(type) {
     try {
-      await addNotification(message);
-      loveMessage.value = "";
-      showToast("Mensaje de amor enviado 💖", "success");
-    } catch (error) {
-      console.error("Error al enviar el mensaje:", error);
-      showToast("❌ Error al enviar el mensaje", "danger");
-    }
-  }
-});
-
-// Escuchar actualizaciones del contador de corazones
-socket.on("updateHearts", (heartData) => {
-  const heartCountElement = document.getElementById("heartCount");
-  if (heartCountElement) {
-    heartCountElement.textContent = `Corazones enviados hoy: ${heartData.count}`;
-  }
-});
-
-// Función para enviar un corazón
-async function sendHeart() {
-  const username = localStorage.getItem("username");
-  if (username) {
-    socket.emit("sendHeart", username);
-  }
-}
-
-// Asignar evento al botón de enviar corazón
-const sendHeartButton = document.getElementById("sendHeartButton");
-if (sendHeartButton) {
-  sendHeartButton.addEventListener("click", () => {
-    const username = localStorage.getItem("username");
-    if (username) {
-      socket.emit("sendHeart", username);
-    }
-  });
-}
+        console.log(`💝 Generando mensaje ${type}...`);
+        showNotification('Generando mensaje especial...', 'info');
+        
+        const message = await askAI('', type);
+        
+        // Mostrar inmediatamente
+        const specialMessage = {
+            sender: 'Asistente IA',
+            content: message,
+            type: type,
+            timestamp: new Date()
+        };
+        
+        displayMessage(specialMessage);
+        
+        // Guardar en la base de datos
+        await sendMessage(message, type);
+        
+        showNotification('¡Mensaje especial añadido!
