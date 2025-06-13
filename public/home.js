@@ -236,4 +236,257 @@ async function addSpecialMessage(type) {
         // Guardar en la base de datos
         await sendMessage(message, type);
         
-        showNotification('¡Mensaje especial añadido!
+        showNotification('¡Mensaje especial añadido! ❤️', 'success');
+        
+    } catch (error) {
+        console.error(`❌ Error generando mensaje ${type}:`, error);
+        showNotification('Error generando mensaje especial', 'error');
+    }
+}
+
+// Iniciar mensajes románticos automáticos
+function startRomanticMessages() {
+    // Limpiar intervalo anterior si existe
+    if (romanticMessageInterval) {
+        clearInterval(romanticMessageInterval);
+    }
+    
+    // Generar mensaje romántico cada 30 minutos
+    romanticMessageInterval = setInterval(async () => {
+        try {
+            await addRomanticMessage();
+        } catch (error) {
+            console.error('❌ Error en mensaje romántico automático:', error);
+        }
+    }, 30 * 60 * 1000); // 30 minutos
+    
+    console.log('💕 Mensajes románticos automáticos iniciados');
+}
+
+// Añadir mensaje romántico automático
+async function addRomanticMessage() {
+    try {
+        console.log('🌹 Generando mensaje romántico automático...');
+        
+        const romanticMessage = await generateRomanticMessage();
+        
+        // Mostrar mensaje
+        const messageData = {
+            sender: 'Asistente IA',
+            content: romanticMessage,
+            type: 'romantic',
+            timestamp: new Date()
+        };
+        
+        displayMessage(messageData);
+        
+        // Guardar en base de datos
+        await sendMessage(romanticMessage, 'romantic');
+        
+        // Enviar por socket si está disponible
+        if (socket && socket.connected) {
+            socket.emit('sendMessage', messageData);
+        }
+        
+        console.log('✅ Mensaje romántico automático enviado');
+        
+    } catch (error) {
+        console.error('❌ Error al generar mensaje romántico:', error);
+    }
+}
+
+// Generar mensaje romántico
+async function generateRomanticMessage() {
+    try {
+        return await askAI('Genera un mensaje romántico', 'romantic');
+    } catch (error) {
+        console.error('❌ Error al generar la frase romántica:', error);
+        
+        // Mensajes de respaldo
+        const fallbackMessages = [
+            "El amor que compartís es la luz que ilumina cada día ✨",
+            "Juntos sois invencibles, juntos sois eternos 💕",
+            "Cada latido de mi corazón susurra tu nombre ❤️",
+            "Nuestro amor es la melodía más hermosa del universo 🎵",
+            "Contigo, cada día es San Valentín 💖",
+            "Eres mi presente favorito de la vida 🎁",
+            "Tu amor es mi refugio seguro 🏠❤️"
+        ];
+        
+        return fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
+    }
+}
+
+// Mostrar notificaciones
+function showNotification(message, type = 'info') {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span class="notification-message">${message}</span>
+        <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+    `;
+    
+    // Añadir estilos si no existen
+    if (!document.getElementById('notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'notification-styles';
+        styles.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+            
+            .notification-success { background: linear-gradient(135deg, #4CAF50, #45a049); }
+            .notification-error { background: linear-gradient(135deg, #f44336, #da190b); }
+            .notification-warning { background: linear-gradient(135deg, #ff9800, #f57c00); }
+            .notification-info { background: linear-gradient(135deg, #2196F3, #1976D2); }
+            
+            .notification-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 0;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    // Añadir al DOM
+    document.body.appendChild(notification);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+// Funciones de utilidad para fechas especiales
+function checkSpecialDates() {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
+    
+    // Verificar fechas especiales
+    if (month === 2 && day === 14) { // San Valentín
+        addSpecialDateMessage("¡Feliz San Valentín! 💕 Hoy celebramos nuestro amor eterno");
+    } else if (month === 12 && day === 25) { // Navidad
+        addSpecialDateMessage("¡Feliz Navidad mi amor! 🎄❤️ El mejor regalo eres tú");
+    } else if (month === 1 && day === 1) { // Año Nuevo
+        addSpecialDateMessage("¡Feliz Año Nuevo amor mío! 🎊 Un año más juntos, un año más de amor");
+    }
+}
+
+// Añadir mensaje de fecha especial
+async function addSpecialDateMessage(message) {
+    try {
+        const specialMessage = {
+            sender: 'Asistente IA',
+            content: message,
+            type: 'special',
+            timestamp: new Date()
+        };
+        
+        displayMessage(specialMessage);
+        await sendMessage(message, 'special');
+        
+        showNotification('¡Mensaje especial del día! 🎉', 'success');
+    } catch (error) {
+        console.error('❌ Error añadiendo mensaje especial:', error);
+    }
+}
+
+// Función para limpiar recursos al salir
+function cleanup() {
+    if (romanticMessageInterval) {
+        clearInterval(romanticMessageInterval);
+    }
+    
+    if (socket) {
+        socket.disconnect();
+    }
+}
+
+// Manejar cierre de ventana
+window.addEventListener('beforeunload', cleanup);
+
+// Verificar fechas especiales al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(checkSpecialDates, 2000);
+});
+
+// Función para exportar conversación
+function exportConversation() {
+    try {
+        const messages = Array.from(document.querySelectorAll('.message'));
+        let exportText = `💕 Conversación de Amor - ${new Date().toLocaleDateString('es-ES')} 💕\n\n`;
+        
+        messages.forEach(msg => {
+            const sender = msg.querySelector('.sender').textContent;
+            const content = msg.querySelector('.message-content').textContent;
+            const timestamp = msg.querySelector('.timestamp').textContent;
+            
+            exportText += `[${timestamp}] ${sender}: ${content}\n\n`;
+        });
+        
+        // Crear archivo de descarga
+        const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `conversacion-amor-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('¡Conversación exportada! 📄', 'success');
+    } catch (error) {
+        console.error('❌ Error exportando conversación:', error);
+        showNotification('Error al exportar', 'error');
+    }
+}
+
+// Añadir botón de exportar si no existe
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const chatContainer = document.querySelector('.chat-container');
+        if (chatContainer && !document.getElementById('exportBtn')) {
+            const exportBtn = document.createElement('button');
+            exportBtn.id = 'exportBtn';
+            exportBtn.className = 'btn btn-outline-secondary btn-sm';
+            exportBtn.innerHTML = '📄 Exportar Chat';
+            exportBtn.onclick = exportConversation;
+            exportBtn.style.marginTop = '10px';
+            
+            chatContainer.appendChild(exportBtn);
+        }
+    }, 1000);
+});
