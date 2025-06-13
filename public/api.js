@@ -1,208 +1,191 @@
-const API_BASE_URL = "https://ismarina.onrender.com"; // Reemplaza con tu URL en Render
+// api.js - API del frontend corregida
+const API_BASE_URL = window.location.origin;
 
-// Registrar un usuario
-export async function registerUser(username, password) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
-        });
+// Configuración de headers con token
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : ''
+  };
+};
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al registrar el usuario");
-        }
+// Función para manejar errores de API
+const handleApiError = async (response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+    throw new Error(errorData.error || `Error ${response.status}`);
+  }
+  return response.json();
+};
 
-        return response.json();
-    } catch (error) {
-        console.error("Error en registerUser:", error);
-        throw error;
-    }
+// Función de login
+async function login(username, password) {
+  try {
+    console.log('🔐 Intentando login...');
+    
+    const response = await fetch(`${API_BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await handleApiError(response);
+    
+    // Guardar token
+    localStorage.setItem('authToken', data.token);
+    localStorage.setItem('username', data.username);
+    
+    console.log('✅ Login exitoso');
+    return data;
+  } catch (error) {
+    console.error('❌ Error en login:', error);
+    throw error;
+  }
 }
 
-// Iniciar sesión
-export async function loginUser(username, password) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
-        });
+// Función de registro
+async function register(username, password) {
+  try {
+    console.log('📝 Intentando registro...');
+    
+    const response = await fetch(`${API_BASE_URL}/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al iniciar sesión");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error en loginUser:", error);
-        throw error;
-    }
+    const data = await handleApiError(response);
+    
+    // Guardar token
+    localStorage.setItem('authToken', data.token);
+    localStorage.setItem('username', data.username);
+    
+    console.log('✅ Registro exitoso');
+    return data;
+  } catch (error) {
+    console.error('❌ Error en registro:', error);
+    throw error;
+  }
 }
 
-// Obtener todas las entradas del diario
-export async function getDiaryEntries() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/diary`);
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al obtener las entradas del diario");
-        }
-        return response.json();
-    } catch (error) {
-        console.error("Error en getDiaryEntries:", error);
-        throw error;
-    }
+// Función para obtener mensajes
+async function getMessages() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/messages`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    return await handleApiError(response);
+  } catch (error) {
+    console.error('❌ Error obteniendo mensajes:', error);
+    throw error;
+  }
 }
 
-// Agregar una nueva entrada al diario
-export async function addDiaryEntry(user, entry) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/diary`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user, entry })
-        });
+// Función para enviar mensaje
+async function sendMessage(content, type = 'user') {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/messages`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ content, type })
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al agregar la entrada al diario");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error en addDiaryEntry:", error);
-        throw error;
-    }
+    return await handleApiError(response);
+  } catch (error) {
+    console.error('❌ Error enviando mensaje:', error);
+    throw error;
+  }
 }
 
-// Obtener la cantidad de corazones de un usuario
-export async function getHearts(user) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/hearts?user=${user}`);
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al obtener los corazones");
-        }
-        return response.json();
-    } catch (error) {
-        console.error("Error en getHearts:", error);
-        throw error;
-    }
+// Función para el asistente IA - CORREGIDA
+async function askAI(prompt, type = 'romantic') {
+  try {
+    console.log('🤖 Consultando asistente IA...');
+    
+    const response = await fetch(`${API_BASE_URL}/asistente`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ prompt, type })
+    });
+
+    const data = await handleApiError(response);
+    console.log('✅ Respuesta del asistente recibida');
+    
+    return data.message;
+  } catch (error) {
+    console.error('❌ Error en askAI:', error);
+    
+    // Respuestas de respaldo si la API falla
+    const fallbackMessages = {
+      romantic: [
+        "Tu amor es el regalo más hermoso que la vida me ha dado ❤️",
+        "Cada día contigo es una nueva aventura llena de amor 💕",
+        "Eres la razón por la que sonrío cada mañana 🌅",
+        "Nuestro amor es eterno e inquebrantable 💖",
+        "Juntos podemos conquistar el mundo 🌍❤️"
+      ],
+      memory: [
+        "Los recuerdos que creamos juntos son nuestro tesoro más preciado 💎",
+        "Cada momento vivido contigo se convierte en un recuerdo hermoso 📸",
+        "Nuestras memorias son la prueba de nuestro amor verdadero 💭",
+        "Recordar nuestros momentos especiales me llena de felicidad 🥰"
+      ],
+      advice: [
+        "El amor verdadero requiere paciencia, comprensión y comunicación 💬",
+        "Celebren cada pequeño momento juntos 🎉",
+        "La confianza es la base de toda relación sólida 🤝",
+        "Nunca dejen de sorprenderse mutuamente 🎁"
+      ]
+    };
+    
+    const messages = fallbackMessages[type] || fallbackMessages.romantic;
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
 }
 
-// Incrementar el contador de corazones
-export async function addHeart(user) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/hearts`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al incrementar los corazones");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error en addHeart:", error);
-        throw error;
-    }
+// Función para verificar autenticación
+function isAuthenticated() {
+  const token = localStorage.getItem('authToken');
+  const username = localStorage.getItem('username');
+  return !!(token && username);
 }
 
-// Obtener recuerdos privados
-export async function getPrivateMemories(user) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/recuerdos?user=${user}`);
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al obtener los recuerdos privados");
-        }
-        return response.json();
-    } catch (error) {
-        console.error("Error en getPrivateMemories:", error);
-        throw error;
-    }
+// Función para obtener usuario actual
+function getCurrentUser() {
+  return localStorage.getItem('username');
 }
 
-// Agregar un recuerdo privado
-export async function addPrivateMemory(user, memory) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/recuerdos`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user, memory })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al agregar el recuerdo privado");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error en addPrivateMemory:", error);
-        throw error;
-    }
+// Función para logout
+function logout() {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('username');
+  window.location.href = '/';
 }
 
-// Asistente Virtual con IA
-export async function askAI(message) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/asistente`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error en la solicitud al asistente");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error en askAI:", error);
-        throw error;
+// Verificar si el token expiró
+async function checkTokenValidity() {
+  try {
+    await getMessages();
+    return true;
+  } catch (error) {
+    if (error.message.includes('Token') || error.message.includes('401') || error.message.includes('403')) {
+      logout();
+      return false;
     }
+    return true;
+  }
 }
 
-// Obtener notificaciones
-export async function getNotifications() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/notificaciones`);
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al obtener las notificaciones");
-        }
-        return response.json();
-    } catch (error) {
-        console.error("Error en getNotifications:", error);
-        throw error;
-    }
-}
-
-// Agregar una nueva notificación
-export async function addNotification(message) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/notificaciones`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error al agregar la notificación");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error en addNotification:", error);
-        throw error;
-    }
-}
+// Inicializar verificación de token al cargar
+document.addEventListener('DOMContentLoaded', () => {
+  if (isAuthenticated()) {
+    checkTokenValidity();
+  }
+});
